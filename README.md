@@ -15,8 +15,11 @@ Python 3 and the following libraries installed:
  - Picke
  - gzip
  - urllib
- - json 
  
+If you would like to use the profiling option to measure system efficiency, please make sure you have the following libraries installed as well:
+
+ - cProfile
+ - pstats
 
 # Installation
 
