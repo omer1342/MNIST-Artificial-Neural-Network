@@ -7,8 +7,43 @@ This project covers the implementation and research into ANNs.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle, gzip, urllib.request, json
+import pickle, gzip, urllib.request
 import os.path
+import cProfile, pstats
+
+
+def profile(fnc):
+    '''
+    Profile for single function.
+    This function is based on Python's documention for profiling:
+    https://docs.python.org/2/library/profile.html
+
+    Arguments:
+    fnc -- function to be tested
+
+    Returns:
+    inner -- the output of the function: "fnc", in order for the main program to continue running
+    '''
+
+    def inner(*args, **kwargs):
+        '''
+        Inner workings of the profiler function.
+
+        Arguments:
+        *args, **kwargs -- arguments on the function: "fnc"
+
+        Returns:
+        retval -- the output of the functon: "fnc" in order for the main program to continue running
+        '''
+        pr = cProfile.Profile() # Creating a new cProfile object
+        pr.enable() # Start recording
+        retval = fnc(*args, **kwargs)
+        pr.disable() #Stop recording
+        ps = pstats.Stats(pr).strip_dirs().sort_stats('cumtime') # Retrieve the info, hide dirs and sory by cumulative time
+        ps.print_stats()                                         # Print stats to console
+        return retval
+
+    return inner
 
 
 def layer_sizes(X, Y):
@@ -16,8 +51,8 @@ def layer_sizes(X, Y):
     Calculates the required number of neurons in the input and output layers.
 
     Arguments:
-    X -- input dataset of shape (number of examples, input size)
-    Y -- labels of shape (number of examples, output size)
+    X -- input dataset of shape (input size, number of examples)
+    Y -- labels of shape (output size, number of examples)
 
     Returns:
     n_x -- the size of the input layer
@@ -77,7 +112,7 @@ def forward_propagation(X, parameters):
     b2 = parameters["b2"]
 
     Z1 = np.dot(W1, X) + b1     # Calculation of the weighted sum plus the bias
-    A1 = np.tanh(Z1)            # tanh activation function in the hidden layer
+    A1 = ReLU(Z1)            # tanh activation function in the hidden layer
     Z2 = np.dot(W2, A1) + b2
     A2 = sigmoid(Z2)            # sigmoid activation function in the output layer 
 
@@ -89,7 +124,7 @@ def forward_propagation(X, parameters):
     return A2, cache
 
 
-def compute_cost(A2, Y, parameters):
+def compute_cost(A2, Y):
     """
     Computes the cost, according to the cross-entropy equation.
 
@@ -108,9 +143,6 @@ def compute_cost(A2, Y, parameters):
     logprobs = np.multiply(np.log(A2), Y) + np.multiply((1-Y), np.log(1- A2))
     cost = -np.sum(logprobs)/m
     
-    cost = np.squeeze(cost)     # makes sure cost is the dimension we expect
-                                # E.g., turns [[17]] into 17
-
     return cost
 
 
@@ -133,7 +165,8 @@ def backward_propagation(parameters, cache, X, Y):
     W1 = parameters["W1"]
     W2 = parameters["W2"]
 
-    # Retrieve "A1" and "A2" from the dictionary "cache"
+    # Retrieve "Z1", "A1" and "A2" from the dictionary "cache"
+    Z1 = cache["Z1"]
     A1 = cache["A1"]
     A2 = cache["A2"]
 
@@ -142,7 +175,7 @@ def backward_propagation(parameters, cache, X, Y):
     dW2 = np.dot(dZ2, A1.T)/m
     db2 = np.sum(dZ2, axis=1, keepdims = True) / m
 
-    dZ1 = np.multiply(np.dot(W2.T, dZ2), (1 - np.square(A1)))
+    dZ1 = np.multiply(np.dot(W2.T, dZ2), ReLU_der(Z1))
     dW1 = np.dot(dZ1, X.T)/m
     db1 = np.sum(dZ1, axis = 1, keepdims = True) / m
 
@@ -192,7 +225,7 @@ def update_parameters(parameters, nabla, learning_rate):
     return parameters
 
 
-def nn_model(data, n_h, learning_rate = 0.35, epochs = 20000, print_cost=True):
+def nn_model(data, n_h, learning_rate = 0.35, epochs = 10000, print_cost=True):
     """
     Main function, brings together the network.
     
@@ -205,7 +238,7 @@ def nn_model(data, n_h, learning_rate = 0.35, epochs = 20000, print_cost=True):
     n_h -- size of the hidden layer
     learning_rate -- the learning rate of the network, affects the impact the gradients will have on updated parameters
     num_iterations -- Number of epochs
-    print_cost -- if True, print the cost every 100 iterations
+    print_cost -- if True, print the cost every 500 iterations
 
     Returns:
     parameters -- parameters learnt by the model. They can then be used to predict 
@@ -236,7 +269,7 @@ def nn_model(data, n_h, learning_rate = 0.35, epochs = 20000, print_cost=True):
         A2, cache = forward_propagation(X, parameters)
 
         # Then, compute the cost of the network for its final output: "A2" and target values: "Y"
-        cost = compute_cost(A2, Y, parameters)
+        cost = compute_cost(A2, Y)
 
         # Backpropagate through the layers of the network in order to achieve the gradients 
         nabla = backward_propagation(parameters, cache, X, Y)
@@ -244,7 +277,7 @@ def nn_model(data, n_h, learning_rate = 0.35, epochs = 20000, print_cost=True):
         # Update the weights and biases according to the gradients
         parameters = update_parameters(parameters, nabla, learning_rate)
 
-        if print_cost and i % 100 == 0:
+        if print_cost and i % 500 == 0:
             precision = evaluate(test_X, test_Y, parameters)
             print('Cost after iteration %i: %f, %a percent accuracy.' %(i, cost, precision))
             loss.append(cost)
@@ -370,7 +403,7 @@ def visualize(loss, evaluations, epochs):
     Returns:
     None, produces graphs and saves them to the local folder
     '''
-    xaxis = np.arange(0, epochs, 100)
+    xaxis = np.arange(0, epochs, 500)
 
     plt.grid()
     plt.xlabel('Epochs')
@@ -379,7 +412,7 @@ def visualize(loss, evaluations, epochs):
 
     plt.savefig('CostGraph.png') # Save cost graph to local folder
 
-    plt.cla()
+    plt.cla() # Clear figure for the next graph to be plotted
     plt.grid()
     plt.hlines(100, 0, epochs, linestyles='dashed') # Plot maximum line - at 100% success rate
     plt.ylabel('Accuracy')
@@ -387,12 +420,37 @@ def visualize(loss, evaluations, epochs):
 
     plt.savefig('EvalGraph.png') # Save evluation graph to local folder
 
+def ReLU(x):
+    '''
+    The ReLU activation function.
+
+    Arguments:
+    x -- Number or array to perform the ReLU function on
+
+    Returns:
+    The output of the ReLU function for: "x"
+    '''
+    return np.maximum(0,x)
+
+
+def ReLU_der(x):
+    '''
+    The derivative of the ReLU functon.
+
+    Arguments:
+    x -- Number or array to perform the derivative of the ReLU function on
+
+    Returns:
+    The output of the derivative of the ReLU function
+    '''
+    return np.where(x <=0, 0, 1)
+
 
 if __name__ == "__main__":
     # Retrieve the training and testing data
     data = load_data()
     # Calls the main method to start the learning proces
-    nn_model(data, 32)
+    nn_model(data, 150)
 
 
 
