@@ -1,7 +1,6 @@
 Python 3.7.4 (tags/v3.7.4:e09359112e, Jul  8 2019, 19:29:22) [MSC v.1916 32 bit (Intel)] on win32
 Type "help", "copyright", "credits" or "license()" for more information.
->>> 
- RESTART: C:\Users\omerh\Desktop\MNIST Artificial Neural Network\Final Network.py 
+>>>  
 Cost after iteration 0: 6.929290, 14.11 percent accuracy.
 Cost after iteration 500: 0.360507, 94.81 percent accuracy.
 Cost after iteration 1000: 0.241227, 96.43 percent accuracy.
