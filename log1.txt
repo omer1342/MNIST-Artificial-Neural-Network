@@ -1,0 +1,25 @@
+Python 3.7.4 (tags/v3.7.4:e09359112e, Jul  8 2019, 19:29:22) [MSC v.1916 32 bit (Intel)] on win32
+Type "help", "copyright", "credits" or "license()" for more information.
+>>> 
+ RESTART: C:\Users\omerh\Desktop\MNIST Artificial Neural Network\Final Network.py 
+Cost after iteration 0: 6.929290, 14.11 percent accuracy.
+Cost after iteration 500: 0.360507, 94.81 percent accuracy.
+Cost after iteration 1000: 0.241227, 96.43 percent accuracy.
+Cost after iteration 1500: 0.182547, 97.01 percent accuracy.
+Cost after iteration 2000: 0.146679, 97.31 percent accuracy.
+Cost after iteration 2500: 0.121864, 97.55 percent accuracy.
+Cost after iteration 3000: 0.103451, 97.75 percent accuracy.
+Cost after iteration 3500: 0.089098, 97.88 percent accuracy.
+Cost after iteration 4000: 0.077576, 97.97 percent accuracy.
+Cost after iteration 4500: 0.068101, 98.02 percent accuracy.
+Cost after iteration 5000: 0.060119, 98.02 percent accuracy.
+Cost after iteration 5500: 0.053351, 98.06 percent accuracy.
+Cost after iteration 6000: 0.047551, 98.1 percent accuracy.
+Cost after iteration 6500: 0.042561, 98.13 percent accuracy.
+Cost after iteration 7000: 0.038253, 98.13 percent accuracy.
+Cost after iteration 7500: 0.034511, 98.15 percent accuracy.
+Cost after iteration 8000: 0.031251, 98.16 percent accuracy.
+Cost after iteration 8500: 0.028408, 98.13 percent accuracy.
+Cost after iteration 9000: 0.025915, 98.12 percent accuracy.
+Cost after iteration 9500: 0.023717, 98.14 percent accuracy.
+>>> 

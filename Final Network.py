@@ -14,7 +14,7 @@ import cProfile, pstats
 
 def profile(fnc):
     '''
-    Profile for single function.
+    Profile for a single function.
     This function is based on Python's documention for profiling:
     https://docs.python.org/2/library/profile.html
 
@@ -99,7 +99,8 @@ def forward_propagation(X, parameters):
 
     Argument:
     X -- input data of size (784, number of examples)
-    parameters -- python dictionary containing the network's parameters: W1, b1, W2 and b2 (output of initialization function)
+    parameters -- python dictionary containing the network's parameters:
+    W1, b1, W2 and b2 (output of initialization function)
 
     Returns:
     A2 -- The sigmoid output of the second activation
@@ -112,7 +113,7 @@ def forward_propagation(X, parameters):
     b2 = parameters["b2"]
 
     Z1 = np.dot(W1, X) + b1     # Calculation of the weighted sum plus the bias
-    A1 = ReLU(Z1)            # tanh activation function in the hidden layer
+    A1 = ReLU(Z1)               # ReLU activation function in the hidden layer
     Z2 = np.dot(W2, A1) + b2
     A2 = sigmoid(Z2)            # sigmoid activation function in the output layer 
 
@@ -172,8 +173,8 @@ def backward_propagation(parameters, cache, X, Y):
 
     # Backward propagation: calculate dW1, db1, dW2, db2
     dZ2 = A2 - Y
-    dW2 = np.dot(dZ2, A1.T)/m
-    db2 = np.sum(dZ2, axis=1, keepdims = True) / m
+    dW2 = np.dot(dZ2, A1.T)/m                           # Divided by "m" to find average gradient
+    db2 = np.sum(dZ2, axis=1, keepdims = True) / m 
 
     dZ1 = np.multiply(np.dot(W2.T, dZ2), ReLU_der(Z1))
     dW1 = np.dot(dZ1, X.T)/m
@@ -282,7 +283,8 @@ def nn_model(data, n_h, learning_rate = 0.35, epochs = 10000, print_cost=True):
             print('Cost after iteration %i: %f, %a percent accuracy.' %(i, cost, precision))
             loss.append(cost)
             accuracy.append(precision)
-
+        
+    
     visualize(loss, accuracy, epochs)
     return parameters
 
@@ -420,6 +422,7 @@ def visualize(loss, evaluations, epochs):
 
     plt.savefig('EvalGraph.png') # Save evluation graph to local folder
 
+
 def ReLU(x):
     '''
     The ReLU activation function.
@@ -432,7 +435,7 @@ def ReLU(x):
     '''
     return np.maximum(0,x)
 
-
+@profile
 def ReLU_der(x):
     '''
     The derivative of the ReLU functon.
